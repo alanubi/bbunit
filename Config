@@ -1,0 +1,37 @@
+# *********************** #
+# Configure distribution. #
+# *********************** #
+
+VERSION  = 0.4
+TARNAME  = bbunit-$(VERSION)
+
+# *********************** #
+# Configure installation. #
+# *********************** #
+
+DESTDIR ?=
+PREFIX  ?= /usr/local
+INCDIR   = $(PREFIX)/include
+LIBDIR   = $(PREFIX)/lib
+SHAREDIR = $(PREFIX)/share
+
+# ********************** #
+# Configure compilation. #
+# ********************** #
+
+CC      ?= cc
+CFLAGS  ?=
+HFLAGS  ?=
+LDFLAGS ?=
+
+ALL_CFLAGS   = -std=c89 -pedantic -Wall -Wextra \
+	-DNOINCLUDE -D_POSIX_C_SOURCE=199309L -DBBUNIT_VERSION=$(VERSION) -O2
+ALL_HFLAGS   = -std=c89 -pedantic -Wall -Wextra -Werror -O2
+ALL_LDFLAGS  = -s
+
+# Disable colorizing of testing reports.
+#ALL_CFLAGS  += -DANSICOLOR_OFF
+
+ALL_CFLAGS  += $(CFLAGS)
+ALL_HFLAGS  += $(HFLAGS)
+ALL_LDFLAGS += $(LDFLAGS)
