@@ -7,17 +7,11 @@
 `libbbunit.a`
 > Static library file with the unit testing framework.
 
-`bbunit/bbunit.h`
-> The header with short aliases to all necessary commands.
-
 `bbunit/engine.h`
-> The header with the commands that occur within a test.
+> The header with basic unit testing functionality.
 
 `bbunit/report.h`
-> The header with the commands necessary to run a test.
-
-`bbunit/internal.h`
-> The header with the command for running a test manually.
+> The header with short commands and pretty reports.
 
 `demo.c`
 > Look at this file to learn how to use the library.
@@ -25,7 +19,7 @@
 ---
 ### System requirements
 
-Make sure you have installed `bbdump` library
+Make sure you have installed `bbmacro` library of version `0.5`
 and have a POSIX-compliant system.
 
 ---
@@ -39,7 +33,7 @@ Then build the program by running this command:
 
     $ make
 
-You can check that the header files are
+You can check if the header files are
 self-contained and compilable *(optional step)*:
 
     $ make face
@@ -49,8 +43,8 @@ You can also run the provided demo program *(optional step)*:
     $ make demo
     $ build/demo
 
-And finally, install the library and its header files
-(you need superuser privileges):
+And finally, install the library and the header files
+(you need the superuser privileges):
 
     # make install
 

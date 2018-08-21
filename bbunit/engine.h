@@ -1,49 +1,25 @@
-/*
-  bbunit -- C library for unit testing
-  Copyright (C) 2017 Alexey Gantura <ganturagantura@yandex.ru>
-
-  This software is provided 'as-is', without any express or implied
-  warranty.  In no event will the authors be held liable for any damages
-  arising from the use of this software.
-
-  Permission is granted to anyone to use this software for any purpose,
-  including commercial applications, and to alter it and redistribute it
-  freely, subject to the following restrictions:
-
-  1. The origin of this software must not be misrepresented; you must not
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would be
-     appreciated but is not required.
-  2. Altered source versions must be plainly marked as such, and must not be
-     misrepresented as being the original software.
-  3. This notice may not be removed or altered from any source distribution.
-*/
-
 #ifndef BBUNIT_ENGINE_H_
 #define BBUNIT_ENGINE_H_
 
 #ifndef NOINCLUDE
 #define NOINCLUDE
-#include <bbdump/specifier.h>
+#include <bbmacro/static.h>
 #undef NOINCLUDE
 #endif
 
-/* Argument to a test execution. */
-enum bbunit_flags {
-	BBUNIT_SUBORDINATE = 1 << 0,
-	BBUNIT_UNLIMITED_TIME = 1 << 1,
-	BBUNIT_NOFLAGS = 0
-};
+/****************************************
+ * Contents of a test procedure.
+ ****************************************/
 
 /* Version is a static immutable string. */
 extern const char *const bbunit_version;
 
 /* A test may be skipped. */
-NORETURN void bbunit_skip();
+BBNORETURN void bbunit_skip(void);
 
 /* A test may fail, directly or by failing an assertion.
  * `file` must be a static immutable string. */
-NORETURN void bbunit_failhere(const char *file, int line);
+BBNORETURN void bbunit_failhere(const char *file, int line);
 
 #define bbunit_fail() \
 	bbunit_failhere(__FILE__, __LINE__)
@@ -56,5 +32,58 @@ do { \
 
 /* A test may have a name. It must be a static immutable string. */
 void bbunit_name(const char *name);
+
+/****************************************
+ * Execution of a test or a testsuite.
+ ****************************************/
+
+/* Argument for a test execution. */
+enum bbunit_flags {
+	BBUNIT_SUBORDINATE = 1 << 0, /* Is the test a part of a testsuite. */
+	BBUNIT_UNLIMITED_TIME = 1 << 1, /* Is timelimit argument ignored. */
+	BBUNIT_NOFLAGS = 0 /* Do we really need this zero flag here? */
+};
+
+/* Concise verdict of a test execution. */
+enum bbunit_verdict {
+	BBUNIT_PASS, /* Successful execution, nothing has happened. */
+	BBUNIT_SKIP, /* A programmer decided not to execute the test. */
+	BBUNIT_FAIL, /* An assertion within the test has failed. */
+	BBUNIT_CRASH, /* A runtime error has happened during the execution. */
+	BBUNIT_TIME /* The test has been interrupted by the timelimit. */
+};
+
+/* Complete information about the testing. */
+struct bbunit_info {
+	/* Concise verdict of the testing. */
+	enum bbunit_verdict verdict;
+
+	/* Number of skipped and bad (not passed or skipped) tests
+	 * in the testsuite and its subsuites. */
+	unsigned long num_off;
+	unsigned long num_bad;
+
+	/* The position in the test where an assertion has failed.
+	 * Makes sense only if the verdict is BBUNIT_FAIL.
+	 * `file` must be a static immutable string. */
+	const char *file;
+	int line;
+
+	/* Optional name of the test.
+	 * It must be a static immutable string or NULL. */
+	const char *name;
+
+	/* Nesting level of the testing.
+	 * Top-level testsuite has level zero. */
+	unsigned nesting;
+
+	/* Time consumed by the testing, in seconds. */
+	float time_sec;
+};
+
+/* Execute a test in a testsuite or separately.
+ * On error return -1, normally return 0. */
+int bbunit_execute(void (*test)(void), float timelimit_sec, int flags,
+	struct bbunit_info *info);
 
 #endif

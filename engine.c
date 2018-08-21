@@ -1,17 +1,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/time.h>
-#include <bbdump/specifier.h>
-#include <bbdump/ansicolor.h>
-#include <bbdump/switch.h>
+#include <bbmacro/label.h>
+#include <bbmacro/static.h>
 #include <bbunit/engine.h>
-#include <bbunit/internal.h>
 
-const char *const bbunit_version = ANSICOLOR_XSTR(BBUNIT_VERSION);
+const char *const bbunit_version = bbstatic_xstr(BBUNIT_VERSION);
 
 static float timespec_dif(struct timespec *former, struct timespec *latter)
 {
@@ -56,7 +55,7 @@ static int readmsg(void *msg, size_t size, int readfd)
 
 /********************/
 
-/* Pipe to transport messages to parent process. */
+/* The pipe for transporting messages to parent process. */
 static int bbunit_writefd;
 
 enum msgkind {
@@ -77,12 +76,12 @@ struct raise {
 	unsigned long num_bad;
 };
 
-static INLINE void writemsgkind(enum msgkind kind)
+static BBINLINE void writemsgkind(enum msgkind kind)
 {
 	writemsg(&kind, sizeof(kind), bbunit_writefd);
 }
 
-static NORETURN void bbunit_pass()
+static BBNORETURN void bbunit_pass(void)
 {
 	enum bbunit_verdict verdict = BBUNIT_PASS;
 
@@ -92,7 +91,7 @@ static NORETURN void bbunit_pass()
 	exit(0);
 }
 
-NORETURN void bbunit_skip()
+void bbunit_skip(void)
 {
 	enum bbunit_verdict verdict = BBUNIT_SKIP;
 
@@ -102,7 +101,7 @@ NORETURN void bbunit_skip()
 	exit(0);
 }
 
-NORETURN void bbunit_failhere(const char *file, int line)
+void bbunit_failhere(const char *file, int line)
 {
 	struct position pos;
 
@@ -134,7 +133,7 @@ static void bbunit_raise(enum bbunit_verdict verdict,
 
 /********************/
 
-/* Nesting level of a current child process.
+/* The nesting level of a current child process.
  * The value is just a foolproof. */
 static unsigned bbunit_nesting = 0U - 1U;
 
@@ -186,7 +185,8 @@ static int read_grandchild(int readfd, struct bbunit_info *info)
 	return 0;
 }
 
-static int child(void (*test)(), float timelimit_sec, int flags, int writefd)
+static int child(void (*test)(void), float timelimit_sec, int flags,
+	int writefd)
 {
 	int res;
 	int pipefd[2];
@@ -257,7 +257,7 @@ static int child(void (*test)(), float timelimit_sec, int flags, int writefd)
 	return res;
 }
 
-int bbunit_execute(void (*test)(), float timelimit_sec, int flags,
+int bbunit_execute(void (*test)(void), float timelimit_sec, int flags,
 	struct bbunit_info *info)
 {
 	int res;

@@ -1,11 +1,15 @@
-/* Included only for "abort()". */
+/* Included here only for `abort()`. */
 #include <stdlib.h>
 
-/* To use the library, just include this file. */
-#include <bbunit/bbunit.h>
+/* To be pedantic, include these. */
+#include <bbmacro/static.h>
+#include <bbunit/engine.h>
+
+/* But it would always be enough to include just this. */
+#include <bbunit/report.h>
 
 /* A test should be of this type. */
-static void testall()
+static void testall(void)
 {
 	/* You can give a name to the test if you wish.
 	 * Make sure this line will be executed.
@@ -13,22 +17,22 @@ static void testall()
 	bbname("All tests");
 
 	/* Tests and testsuites are executed in this way.
-	 * They do not need to be declared, so they can be placed
-	 * in a separate file without redundant headers. */
+	 * They do not need to be declared, so they can be placed in a separate
+	 * file without redundant headers containing forward declarations. */
 	bbtest(typical);
 	bbtest(version);
 	bbtest(cover);
 	bbtest(testtime);
 }
 
-int main()
+int main(void)
 {
 	/* Top-level testsuites must be executed in a special way. */
 	bbmaintest(testall);
 	return 0;
 }
 
-void typical()
+void typical(void)
 {
 	int sum = 0;
 	int i = 0, n = 10;
@@ -36,28 +40,28 @@ void typical()
 	bbname("Typical test");
 
 	/* Typical test looks like this. */
-	for (; i != n; ++i) {
+	for (; i != n; i++) {
 		sum += i;
 		bbcheck(sum >= 0);
 	}
 	bbcheck(sum == 45);
 }
 
-void version()
+void version(void)
 {
 	/* The version of library is stored here,
 	 * in a static immutable string. */
 	bbname(bbunit_version);
 }
 
-static void naked_pass()
+static void naked_pass(void)
 {
 	bbname("Naked pass");
 
 	/* If nothing happens, the test passes. */
 }
 
-static void naked_skip()
+static void naked_skip(void)
 {
 	bbname("Naked skip");
 
@@ -67,7 +71,7 @@ static void naked_skip()
 	/* Unreachable location. */
 }
 
-static void naked_fail()
+static void naked_fail(void)
 {
 	bbname("Naked fail");
 
@@ -78,7 +82,7 @@ static void naked_fail()
 	/* Unreachable location. */
 }
 
-static void naked_checkfail()
+static void naked_checkfail(void)
 {
 	bbname("Naked check-fail");
 
@@ -88,7 +92,7 @@ static void naked_checkfail()
 	/* Unreachable location. */
 }
 
-static void naked_hang()
+static void naked_hang(void)
 {
 	bbname("Naked hang");
 
@@ -101,7 +105,7 @@ static void naked_hang()
 	/* Unreachable location. */
 }
 
-static void naked_crash()
+static void naked_crash(void)
 {
 	bbname("Naked crash");
 
@@ -110,9 +114,10 @@ static void naked_crash()
 	abort();
 }
 
-static void naked()
+static void naked(void)
 {
-	/* A test can be nameless. */
+	/* A test or a testsuite can be left nameless. */
+
 	bbtest(naked_pass);
 	bbtest(naked_skip);
 	bbtest(naked_fail);
@@ -123,7 +128,7 @@ static void naked()
 	bbtesttime(naked_skip, 0.2f);
 }
 
-static void suitefail()
+static void suitefail(void)
 {
 	/* Usual call, not a subtest. */
 	naked();
@@ -133,7 +138,7 @@ static void suitefail()
 	bbfail();
 }
 
-void cover()
+void cover(void)
 {
 	bbname("Cover everything");
 	bbtest(naked);
@@ -144,7 +149,7 @@ void cover()
 	bbskip();
 }
 
-static void testtime_slow()
+static void testtime_slow(void)
 {
 	int a = 0, b = 0;
 	int i = 0, n = 20000000;
@@ -152,7 +157,7 @@ static void testtime_slow()
 	bbname("Time-consuming test");
 
 	/* For time-consuming tests, the time will be printed. */
-	for (; i != n; ++i) {
+	for (; i != n; i++) {
 		volatile int t = b;
 		b = a + 1;
 		a = t + 1;
@@ -161,11 +166,11 @@ static void testtime_slow()
 	bbcheck(b == n);
 }
 
-void testtime()
+void testtime(void)
 {
 	int i = 0, n = 4;
 
 	/* The time consumed by sub-tests will sum up. */
-	for (; i != n; ++i)
+	for (; i != n; i++)
 		bbtest(testtime_slow);
 }
